@@ -6,16 +6,14 @@ export default function Home() {
   const [chatLog, setChatLog] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // This function listens for the Enter key and connects to the Python backend
   const handleChat = async (e) => {
-    if (e.key !== 'Enter') return;
-    if (!message.trim() || loading) return;
+    if (e.key !== 'Enter' || !message.trim() || loading) return;
     
     setLoading(true);
-    const userMsg = { role: "user", content: message };
-    setChatLog((prev) => [...prev, userMsg]);
-    setMessage(""); // Clears the input box instantly
-    
+    const userMsg = { role: "User", content: message };
+    setChatLog(prev => [...prev, userMsg]);
+    setMessage("");
+
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -23,51 +21,38 @@ export default function Home() {
         body: JSON.stringify({ message: userMsg.content }),
       });
       const data = await res.json();
-      setChatLog((prev) => [...prev, { role: "Nexus", content: data.response || "No output from brain." }]);
+      setChatLog(prev => [...prev, { role: "Nexus", content: data.response || "No response." }]);
     } catch (err) {
-      setChatLog((prev) => [...prev, { role: "Nexus", content: "Connection Error: Check vercel.json or api/index.py" }]);
+      setChatLog(prev => [...prev, { role: "Nexus", content: "Connection Error." }]);
     }
-    
     setLoading(false);
   };
 
   return (
     <main className="min-h-screen p-8 bg-[#0a0a0a] text-gray-100 font-sans">
-      <header className="flex justify-between items-center mb-12">
-        <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">
-          Nexus Omni <span className="text-lg text-gray-500 font-mono">v3.3 PRO</span>
-        </h1>
-      </header>
-
+      <h1 className="text-4xl font-bold mb-8 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Nexus Omni v3.3</h1>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-gray-900/40 backdrop-blur-xl border border-white/10 p-8 rounded-3xl shadow-2xl">
-          <h2 className="text-2xl mb-6 text-blue-400 font-semibold tracking-tight">✍️ Code Architect</h2>
-          <input placeholder="Filename" className="w-full bg-black/40 border border-gray-700 p-4 rounded-xl mb-4 text-white" />
-          <textarea placeholder="Source Code" className="w-full h-64 bg-black/40 border border-gray-700 p-4 rounded-xl mb-6 text-white font-mono" />
-          <button className="w-full py-4 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold transition-all shadow-lg shadow-blue-500/20 active:scale-95">🚀 Push to Production</button>
+        <div className="bg-gray-900/50 p-6 rounded-3xl border border-white/10">
+          <h2 className="text-blue-400 mb-4 font-bold">✍️ Code Architect</h2>
+          <textarea className="w-full h-64 bg-black/40 p-4 rounded-xl border border-gray-700" placeholder="Paste code here..." />
         </div>
-
-        <div className="bg-gray-900/40 backdrop-blur-xl border border-white/10 p-8 rounded-3xl shadow-2xl flex flex-col h-[650px]">
-          <h2 className="text-2xl mb-6 text-purple-400 font-semibold tracking-tight">💬 Nexus Intelligent Agent</h2>
-          <div className="flex-grow overflow-y-auto mb-6 space-y-4 p-2 custom-scrollbar">
+        <div className="bg-gray-900/50 p-6 rounded-3xl border border-white/10 flex flex-col h-[500px]">
+          <h2 className="text-purple-400 mb-4 font-bold">💬 Nexus Agent</h2>
+          <div className="flex-grow overflow-y-auto space-y-4 mb-4">
             {chatLog.map((chat, i) => (
-              <div key={i} className={`p-4 rounded-2xl ${chat.role === "Nexus" ? "bg-purple-900/20 border border-purple-500/30 text-purple-100" : "bg-gray-800/40 text-blue-100"}`}>
-                <strong className="block text-[10px] uppercase tracking-widest opacity-50 mb-1">{chat.role}</strong>
-                <p className="whitespace-pre-wrap">{chat.content}</p>
+              <div key={i} className={`p-3 rounded-xl ${chat.role === "Nexus" ? "bg-purple-900/20" : "bg-gray-800"}`}>
+                <span className="text-[10px] block opacity-50">{chat.role}</span>
+                {chat.content}
               </div>
             ))}
-            {loading && <div className="text-purple-400 animate-pulse text-sm font-medium ml-2">Nexus is processing...</div>}
           </div>
-          <div className="relative">
-            <input 
-              value={message} 
-              onChange={(e) => setMessage(e.target.value)} 
-              onKeyDown={handleChat}
-              disabled={loading}
-              placeholder={loading ? "Thinking..." : "Command the Nexus..."} 
-              className="w-full bg-black/40 border border-gray-700 p-4 rounded-xl focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none text-white transition-all shadow-inner" 
-            />
-          </div>
+          <input 
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={handleChat}
+            placeholder="Type and press Enter..." 
+            className="w-full bg-black/40 p-4 rounded-xl border border-gray-700 outline-none focus:border-purple-500" 
+          />
         </div>
       </div>
     </main>
